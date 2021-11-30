@@ -2,10 +2,12 @@ from abc import ABC, abstractmethod
 
 packetFixedHeader = {
     'CONNECT': b'\x10',
+    'DISCONNECT': b'\xE0',
     'PUBLISH': b'\x32',
     'SUBSCRIBE': b'\x82',
     'UNSUBSCRIBE': b'\xA2',
     'PINGREQ': b'\xC0',
+
 }
 
 class Packet(ABC):
@@ -48,6 +50,16 @@ class CONNECT(Packet):
         packet_length = bytes([len(variable_header)])
         packet += packet_length
         packet += variable_header
+
+        return packet
+
+class DISCONNECT(Packet):
+    def parse(self):
+        packet = bytearray()
+
+        packet += packetFixedHeader['DISCONNECT']
+
+        packet += b'\x00'  #remaining length
 
         return packet
 
@@ -114,7 +126,41 @@ class SUBSCRIBE(Packet):
         return packet
 
 class UNSUBSCRIBE(Packet):
-    pass
+    packetVariableHeader = {
+        'packetIdentifier': b'\x00\x0b'
+    }
+    packetPayload = {
+        'Topic_name': "Hello",
+    }
+
+    def parse(self):
+        packet = bytearray()
+
+        packet += packetFixedHeader['UNSUBSCRIBE']
+
+        # variable_header = b'\x00'
+        variable_header = self.packetVariableHeader['packetIdentifier']
+
+        payload = b'\x00'
+        payload += bytes([len(self.packetPayload['Topic_name'])])
+        payload += self.packetPayload['Topic_name'].encode('UTF-8')
+
+        variable_header += payload
+
+        packet_length = bytes([len(variable_header)])
+        packet += packet_length
+        packet += variable_header
+
+        return packet
+
 
 class PINGREQ(Packet):
-    pass
+    def parse(self):
+        packet = bytearray()
+
+        packet += packetFixedHeader['PINGREQ']
+
+        packet += b'\x00'  # remaining length
+
+        return packet
+

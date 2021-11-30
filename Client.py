@@ -1,6 +1,5 @@
 import socket
 import Packets as packets
-import struct
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -34,10 +33,40 @@ class Client:
         msg = s.recv(1024)
         print(msg)
 
+    def unsubscribe(self):
+        packet = packets.UNSUBSCRIBE()
+        packet = packet.parse()
+
+        s.sendall(packet)
+        msg = s.recv(1024)
+        print(msg)
+
+    def disconnect(self):
+        packet = packets.DISCONNECT()
+        packet = packet.parse()
+
+        s.sendall(packet)
+        msg = s.recv(1024)
+        print(msg)
+
+    def pingreq(self):
+        packet = packets.PINGREQ()
+        packet = packet.parse()
+
+        s.sendall(packet)
+        msg = s.recv(1024)
+        print(msg)
+
+
 
 client = Client(1)
 client.connect()
+
 client.publish()
+
 client.subscribe()
 
+client.unsubscribe()
 
+client.pingreq()
+client.disconnect()
