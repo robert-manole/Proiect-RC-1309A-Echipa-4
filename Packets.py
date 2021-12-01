@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-
+from OS_Information import getMessageInstanceByTopicName
 packetFixedHeader = {
     'CONNECT': b'\x10',
     'DISCONNECT': b'\xE0',
@@ -16,19 +16,22 @@ class Packet(ABC):
         pass
 
 class CONNECT(Packet):
-    packetPayload = {
-        'client_id': bytearray(),
-        'will_topic': bytearray(),
-        'will_message': bytearray(),
-        'username': "",
-        'password': ""
-    }
-    packetVariableHeader = {
-        'protocol_name': "MQTT",
-        'version': b'\x04',
-        'connect_flags': b'\x02',
-        'keep_alive': b'\x00\x05',
-    }
+
+    def __init__(self, id, username, password):
+
+        self.packetPayload = {
+            'client_id': str(id),
+            'will_topic': bytearray(),
+            'will_message': bytearray(),
+            'username': username,
+            'password': password
+        }
+        self.packetVariableHeader = {
+            'protocol_name': "MQTT",
+            'version': b'\x04',
+            'connect_flags': b'\xC2',
+            'keep_alive': b'\x00\xFF',
+        }
 
     def parse(self):
         packet = bytearray()
@@ -43,8 +46,14 @@ class CONNECT(Packet):
         variable_header += self.packetVariableHeader['keep_alive']
 
         payload = b'\x00'
+        payload += bytes([len(self.packetPayload['client_id'])])
+        payload += self.packetPayload['client_id'].encode('UTF-8')
+        payload += b'\x00'
         payload += bytes([len(self.packetPayload['username'])])
         payload += self.packetPayload['username'].encode('UTF-8')
+        payload += b'\x00'
+        payload += bytes([len(self.packetPayload['password'])])
+        payload += self.packetPayload['password'].encode('UTF-8')
         variable_header += payload
 
         packet_length = bytes([len(variable_header)])
@@ -64,13 +73,18 @@ class DISCONNECT(Packet):
         return packet
 
 class PUBLISH(Packet):
-    packetPayload = {
-        'message': "Hello"
-    }
-    packetVariableHeader = {
-        'topic_name': "First",
-        'packetIdentifier': b'\x00\x0a'
-    }
+
+    def __init__(self, topic_name):
+
+        os_info = getMessageInstanceByTopicName(topic_name)
+
+        self.packetPayload = {
+            'message': os_info.get_info()
+        }
+        self.packetVariableHeader = {
+            'topic_name': topic_name,
+            'packetIdentifier': b'\x00\x0a'
+        }
 
     def parse(self):
         packet = bytearray()
@@ -83,6 +97,7 @@ class PUBLISH(Packet):
         variable_header += self.packetVariableHeader['packetIdentifier']
 
         payload = b'\x00'
+
         payload += bytes([len(self.packetPayload['message'])])
         payload += self.packetPayload['message'].encode('UTF-8')
         variable_header += payload
@@ -90,19 +105,22 @@ class PUBLISH(Packet):
         packet_length = bytes([len(variable_header)])
         packet += packet_length
         packet += variable_header
-
+        print(packet)
         return packet
 
 
 
 class SUBSCRIBE(Packet):
-    packetPayload = {
-        'Topic_name': "Hello",
-        'req_QoS': b'\x01'
-    }
-    packetVariableHeader = {
-        'packetIdentifier': b'\x00\x0b'
-    }
+
+    def __init__(self, topic_name):
+
+        self.packetPayload = {
+            'Topic_name': topic_name,
+            'req_QoS': b'\x01'
+        }
+        self.packetVariableHeader = {
+            'packetIdentifier': b'\x00\x0b'
+        }
 
     def parse(self):
         packet = bytearray()

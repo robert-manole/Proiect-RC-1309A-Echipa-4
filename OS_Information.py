@@ -1,11 +1,23 @@
-from psutil import sensors_temperatures, cpu_percent, disk_partitions, \
-    cpu_count, cpu_freq, disk_io_counters, disk_usage, virtual_memory
-
+from psutil import cpu_percent, disk_partitions, \
+    cpu_count, cpu_freq, disk_usage, virtual_memory
 import abc
+
 
 def convert_to_gb(_bytes):
     factor = 1024*1024*1024
     return _bytes/factor
+
+def getMessageInstanceByTopicName(topic_name):
+    if topic_name == "CpuInfo":
+        return CpuInformation()
+    if topic_name == "CpuUsage":
+        return CpuUsage()
+    if topic_name == "MemoryInfo":
+        return MemoryInformation()
+    if topic_name == "DiskInfo":
+        return DiskInformation()
+
+
 
 class OSInformation(metaclass=abc.ABCMeta):
 
@@ -34,21 +46,6 @@ class CpuUsage(OSInformation):
         for i, percentage in enumerate(cpu_percent(percpu=True, interval=1)):
             info += f"Core {i}: {percentage}%" + "\n"
         info += f"Total CPU Usage: {cpu_percent()}%" + "\n"
-
-        return info
-
-
-class CpuTemperatures(OSInformation):
-    def get_info(self):
-        info = ""
-        temps = sensors_temperatures()
-        info += "\nCore temperatures: \n"
-
-        if temps:
-            for name, entries in temps.items():
-                if name == "coretemp":
-                    for entry in entries:
-                        info += str(entry.label) + " " + str(entry.current) + " °C\n"
 
         return info
 
