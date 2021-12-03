@@ -88,23 +88,24 @@ class PUBLISH(Packet):
 
     def parse(self):
         packet = bytearray()
-
+        variable_header = bytearray()
         packet += packetFixedHeader['PUBLISH']
 
-        variable_header = b'\x00'
-        variable_header += bytes(str(len(self.packetVariableHeader['topic_name'])), encoding='ascii')
-        variable_header += self.packetVariableHeader['topic_name'].encode('ascii')
+        variable_header += b'\x00'
+        variable_header += bytes([len(self.packetVariableHeader['topic_name'])])
+        variable_header += self.packetVariableHeader['topic_name'].encode('UTF-8')
         variable_header += self.packetVariableHeader['packetIdentifier']
 
         payload = b'\x00'
 
-        payload += bytes(str(len(self.packetPayload['message'])), encoding='ascii')
-        payload += self.packetPayload['message'].encode('ascii')
+        payload += bytes([len(self.packetPayload['message'])])
+        payload += self.packetPayload['message'].encode('UTF-8')
         variable_header += payload
 
         packet_length = bytes([len(variable_header)])
-        packet += packet_length
+        print(packet_length)
 
+        packet += packet_length
         packet += variable_header
         print(packet)
         return packet
