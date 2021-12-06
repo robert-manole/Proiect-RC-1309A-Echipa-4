@@ -10,6 +10,7 @@ packetFixedHeader = {
 
 }
 
+
 class Packet(ABC):
     @abstractmethod
     def parse(self):
@@ -98,14 +99,26 @@ class PUBLISH(Packet):
 
         payload = b'\x00'
 
+
+
         payload += bytes([len(self.packetPayload['message'])])
         payload += self.packetPayload['message'].encode('UTF-8')
         variable_header += payload
 
-        packet_length = bytes([len(variable_header)])
-        print(packet_length)
+        packet_length = len(variable_header)
 
-        packet += packet_length
+        if packet_length > 127:
+            rem = packet_length % 128
+            div = packet_length / 128
+            rem = rem + 128
+            byte1 = bytes([rem])
+            byte2 = bytes([int(div)])
+
+            packet += byte1
+            packet += byte2
+        else:
+            packet += bytes([packet_length])
+
         packet += variable_header
         print(packet)
         return packet
