@@ -123,8 +123,6 @@ class PUBLISH(Packet):
         print(packet)
         return packet
 
-
-
 class SUBSCRIBE(Packet):
 
     def __init__(self, topic_name):
