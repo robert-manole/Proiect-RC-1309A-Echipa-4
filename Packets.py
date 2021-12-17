@@ -7,7 +7,6 @@ packetFixedHeader = {
     'SUBSCRIBE': b'\x82',
     'UNSUBSCRIBE': b'\xA2',
     'PINGREQ': b'\xC0',
-
 }
 
 
@@ -97,11 +96,16 @@ class PUBLISH(Packet):
         variable_header += self.packetVariableHeader['topic_name'].encode('UTF-8')
         variable_header += self.packetVariableHeader['packetIdentifier']
 
-        payload = b'\x00'
+        if len(self.packetPayload['message']) >= 256:
+            len_msg = int(len(self.packetPayload['message']))
+            rem = len_msg % 256
+            div = len_msg / 256
+            payload = bytes([int(div)])
+            payload += bytes([rem])
+        else:
+            payload = b'\x00'
+            payload += bytes([len(self.packetPayload['message'])])
 
-
-
-        payload += bytes([len(self.packetPayload['message'])])
         payload += self.packetPayload['message'].encode('UTF-8')
         variable_header += payload
 

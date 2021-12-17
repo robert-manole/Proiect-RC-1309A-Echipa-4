@@ -4,6 +4,7 @@ from tkinter import ttk
 class GUI:
     root = Tk()
 
+
     def __init__(self, client):
 
         self.client = client
@@ -39,19 +40,55 @@ class GUI:
         self.root.geometry("400x400")
         self.root.resizable(False, False)
 
-        self.root.columnconfigure(0, weight=1)
-        self.root.columnconfigure(1, weight=1)
-        self.root.columnconfigure(2, weight=1)
+        tabControl = ttk.Notebook(self.root)
+        publish_frame = ttk.Frame(tabControl)
+        subscribe_frame = ttk.Frame(tabControl)
+        tabControl.add(publish_frame, text='Publisher')
+        tabControl.add(subscribe_frame, text='Subscriber')
+        tabControl.pack(expand=1, fill="both")
 
-        ttk.Label(text="Topics", font=("Arial", 15)).grid(column=1, row=0, pady=(60, 8))
+        # publisher frame
+        publish_frame.columnconfigure(0, weight=1)
+        publish_frame.columnconfigure(1, weight=1)
+        publish_frame.columnconfigure(2, weight=1)
 
-        chosen_topic = StringVar()
-        topic_combobox = ttk.Combobox(self.root, textvariable=chosen_topic)
+        ttk.Label(publish_frame, text="Topics", font=("Arial", 15)).grid(column=1, row=0, pady=(60, 8))
+
+        chosen_topic_publish = StringVar()
+        topic_combobox = ttk.Combobox(publish_frame, textvariable=chosen_topic_publish)
         topic_combobox['values'] = ('CpuInfo', 'CpuUsage', 'MemoryInfo', 'DiskInfo')
         topic_combobox.grid(column=1, row=1)
         topic_combobox.current()
 
-        ttk.Button(text="Publish", command=lambda: self.client.publish(chosen_topic.get())).grid(column=1, row=2)
-        ttk.Button(text="Subscribe", command=lambda: self.client.subscribe(chosen_topic.get())).grid(column=1, row=3)
+        ttk.Button(publish_frame, text="Publish", command=lambda: self.client.publish(chosen_topic_publish.get())).grid(column=1, row=2)
+
+        # subscriber frame
+        subscribe_frame.columnconfigure(0, weight=1)
+        subscribe_frame.columnconfigure(1, weight=1)
+        subscribe_frame.columnconfigure(2, weight=1)
+
+        ttk.Label(subscribe_frame, text="Topics", font=("Arial", 15)).grid(column=1, row=0, pady=(60, 8))
+
+        chosen_topic_subscribe = StringVar()
+        topic_combobox = ttk.Combobox(subscribe_frame, textvariable=chosen_topic_subscribe)
+        topic_combobox['values'] = ('CpuInfo', 'CpuUsage', 'MemoryInfo', 'DiskInfo')
+        topic_combobox.grid(column=1, row=1)
+        topic_combobox.current()
+
+        msg_text = Text(subscribe_frame, height=5, width=52)
+        msg_text.grid(column=1, row=4)
+        msg_text.config(state='disabled')
+
+        ttk.Button(subscribe_frame, text="Subscribe", command=lambda: self.client.subscribe(chosen_topic_subscribe.get(), msg_text)).grid(
+            column=1, row=3)
+
+        # T.insert('1.0', "saluajsnda\n")
+        # T.insert('1.0', " ALT TEXT\n")
+
+
+
+
+
+
 
 

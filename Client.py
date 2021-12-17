@@ -7,11 +7,12 @@ class Client:
 
     def __init__(self, id):
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.recv_thread = threading.Thread(target=self.receive_msg, args=(self.s,))
+
         self.__id = id
 
     def getId(self):
         return self.__id
+
 
     def connect(self, username, password):
         self.s.connect(('127.0.0.1', 6000))
@@ -29,20 +30,20 @@ class Client:
 
         self.s.sendall(packet)
 
-        if not self.recv_thread.is_alive():
-            self.recv_thread.start()
+        # if not self.recv_thread.is_alive():
+        #     self.recv_thread.start()
 
-        # msg = self.s.recv(1024)
-        # print(msg)
+        msg = self.s.recv(1024)
+        print(msg)
 
-    def subscribe(self, topic_name):
+    def subscribe(self, topic_name, tk_text):
         packet = packets.SUBSCRIBE(topic_name)
         packet = packet.parse()
 
         self.s.sendall(packet)
-
-        if not self.recv_thread.is_alive():
-            self.recv_thread.start()
+        recv_thread = threading.Thread(target=self.receive_msg, args=(self.s, tk_text))
+        if not recv_thread.is_alive():
+            recv_thread.start()
 
         # msg = self.s.recv(1024)
         # print(msg)
@@ -71,10 +72,11 @@ class Client:
         msg = self.s.recv(1024)
         print(msg)
 
-    def receive_msg(self, s):
+    def receive_msg(self, s, tk_text):
         while 1:
             msg = s.recv(4096)
             if msg:
-                print(msg)
-
+                tk_text.config(state='normal')
+                tk_text.insert('1.0', str(msg))
+                tk_text.config(state='disabled')
 
