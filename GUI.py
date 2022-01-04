@@ -1,13 +1,16 @@
-from tkinter import *
+# from tkinter import *
+from mttkinter import mtTkinter as tk
 from tkinter import ttk
+from tkinter.scrolledtext import ScrolledText
 
 class GUI:
-    root = Tk()
+    root = tk.Tk()
 
 
     def __init__(self, client):
 
         self.client = client
+
 
         self.root.title("Client")
         self.root.geometry("300x300")
@@ -31,11 +34,12 @@ class GUI:
 
     def onLogin(self, username, password):
         self.client.connect(username, password)
-        self.root.destroy()
+        for child in self.root.winfo_children():
+            child.destroy()
         self.createClientGUI()
 
     def createClientGUI(self):
-        self.root = Tk()
+
         self.root.title("Client " + str(self.client.getId()))
         self.root.geometry("400x400")
         self.root.resizable(False, False)
@@ -54,13 +58,13 @@ class GUI:
 
         ttk.Label(publish_frame, text="Topics", font=("Arial", 15)).grid(column=1, row=0, pady=(60, 8))
 
-        chosen_topic_publish = StringVar()
+        chosen_topic_publish = tk.StringVar()
         topic_combobox = ttk.Combobox(publish_frame, textvariable=chosen_topic_publish)
         topic_combobox['values'] = ('CpuInfo', 'CpuUsage', 'MemoryInfo', 'DiskInfo')
         topic_combobox.grid(column=1, row=1)
         topic_combobox.current()
 
-        ttk.Button(publish_frame, text="Publish", command=lambda: self.client.publish(chosen_topic_publish.get())).grid(column=1, row=2)
+        ttk.Button(publish_frame, text="Publish", command=lambda:self.client.publish(chosen_topic_publish.get())).grid(column=1, row=2)
 
         # subscriber frame
         subscribe_frame.columnconfigure(0, weight=1)
@@ -69,21 +73,32 @@ class GUI:
 
         ttk.Label(subscribe_frame, text="Topics", font=("Arial", 15)).grid(column=1, row=0, pady=(60, 8))
 
-        chosen_topic_subscribe = StringVar()
+        chosen_topic_subscribe = tk.StringVar()
         topic_combobox = ttk.Combobox(subscribe_frame, textvariable=chosen_topic_subscribe)
         topic_combobox['values'] = ('CpuInfo', 'CpuUsage', 'MemoryInfo', 'DiskInfo')
         topic_combobox.grid(column=1, row=1)
         topic_combobox.current()
 
-        msg_text = Text(subscribe_frame, height=5, width=52)
-        msg_text.grid(column=1, row=4)
+        text_subs = tk.Text(subscribe_frame, height=5, width=52)
+        text_subs.grid(column=1, row=5)
+        text_subs.config(state='disabled')
+
+        msg_text = ScrolledText(subscribe_frame, height=5, width=52)
+        msg_text.grid(column=1, row=6)
         msg_text.config(state='disabled')
 
-        ttk.Button(subscribe_frame, text="Subscribe", command=lambda: self.client.subscribe(chosen_topic_subscribe.get(), msg_text)).grid(
+        ttk.Button(subscribe_frame, text="Subscribe", command=lambda: self.client.subscribe(chosen_topic_subscribe.get(), msg_text, text_subs)).grid(
             column=1, row=3)
+        ttk.Button(subscribe_frame, text="Unsubscribe",
+                   command=lambda: self.client.unsubscribe(chosen_topic_subscribe.get(), text_subs)).grid(
+            column=1, row=4)
 
-        # T.insert('1.0', "saluajsnda\n")
-        # T.insert('1.0', " ALT TEXT\n")
+
+
+
+
+
+
 
 
 

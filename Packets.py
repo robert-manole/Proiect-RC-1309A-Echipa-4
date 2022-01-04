@@ -161,12 +161,17 @@ class SUBSCRIBE(Packet):
         return packet
 
 class UNSUBSCRIBE(Packet):
-    packetVariableHeader = {
-        'packetIdentifier': b'\x00\x0b'
-    }
-    packetPayload = {
-        'Topic_name': "Hello",
-    }
+
+
+    def __init__(self, topic_name):
+        self.topic_name = topic_name
+
+        self.packetVariableHeader = {
+            'packetIdentifier': b'\x00\x0b'
+        }
+        self.packetPayload = {
+            'Topic_name': self.topic_name,
+        }
 
     def parse(self):
         packet = bytearray()
