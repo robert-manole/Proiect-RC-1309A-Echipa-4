@@ -5,21 +5,29 @@ import time
 
 class Client:
 
-    def __init__(self, id):
+    def __init__(self, id, keep_alive):
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.__id = id
+        self.keep_alive_start = 0
+        self.keep_alive = keep_alive
 
     def getId(self):
         return self.__id
 
+    def reset_keep_alive_start(self):
+        self.keep_alive_start = int(time.time())
 
     def connect(self, username, password):
         self.s.connect(('127.0.0.1', 6000))
 
-        packet = packets.CONNECT(self.__id, username, password)
+        packet = packets.CONNECT(self.__id, username, password, self.keep_alive)
         packet = packet.parse()
 
         self.s.sendall(packet)
+
+        self.reset_keep_alive_start()
+        threading.Thread(target=self.keep_alive_thread).start()
+
         msg = self.s.recv(1024)
         print(msg)
 
@@ -28,6 +36,7 @@ class Client:
         packet = packet.parse()
 
         self.s.sendall(packet)
+        self.reset_keep_alive_start()
 
         # if not self.recv_thread.is_alive():
         #     self.recv_thread.start()
@@ -41,6 +50,7 @@ class Client:
         packet = packet.parse()
 
         self.s.sendall(packet)
+        self.reset_keep_alive_start()
 
         subs = text_subs.get('1.0', 'end')
 
@@ -62,6 +72,7 @@ class Client:
         packet = packet.parse()
 
         self.s.sendall(packet)
+        self.reset_keep_alive_start()
 
         subs = text_subs.get('1.0', 'end')
         subs_arr = subs.split('\n')
@@ -109,4 +120,10 @@ class Client:
                     text_msg.insert('1.0', str(topic_name, encoding='ascii') + ":\n" + str(topic_message, encoding='ascii') + '\n\n')
                     text_msg.config(state='disabled')
 
+    def keep_alive_thread(self):
+        while 1:
+            if int(time.time()) - self.keep_alive_start >= self.keep_alive:
+                self.pingreq()
+                self.reset_keep_alive_start()
+            time.sleep(1)
 

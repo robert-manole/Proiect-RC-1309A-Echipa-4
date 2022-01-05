@@ -17,7 +17,7 @@ class Packet(ABC):
 
 class CONNECT(Packet):
 
-    def __init__(self, id, username, password):
+    def __init__(self, id, username, password, keep_alive):
 
         self.packetPayload = {
             'client_id': str(id),
@@ -30,7 +30,7 @@ class CONNECT(Packet):
             'protocol_name': "MQTT",
             'version': b'\x04',
             'connect_flags': b'\xC2',
-            'keep_alive': b'\x00\xFF',
+            'keep_alive': b'\x00' + bytes(chr(keep_alive), encoding='ascii'),
         }
 
     def parse(self):

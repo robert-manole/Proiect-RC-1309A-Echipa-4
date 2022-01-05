@@ -5,7 +5,7 @@ from random import randint
 
 if __name__ == "__main__":
     id = randint(1, 100000)
-    client = Client(id)
+    client = Client(id, 60)
     gui = GUI(client)
     gui.root.mainloop()
 
