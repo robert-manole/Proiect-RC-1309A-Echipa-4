@@ -80,10 +80,10 @@ class DISCONNECT(Packet):
 
 class PUBLISH(Packet):
 
-    def __init__(self, topic_name):
+    def __init__(self, topic_name, qos_lvl):
 
         os_info = getMessageInstanceByTopicName(topic_name)
-
+        self.qos_lvl = qos_lvl
         self.packetPayload = {
             'message': os_info.get_info()
         }
@@ -95,7 +95,13 @@ class PUBLISH(Packet):
     def parse(self):
         packet = bytearray()
         variable_header = bytearray()
-        packet += packetFixedHeader['PUBLISH']
+        print(self.qos_lvl)
+        if self.qos_lvl == 0:
+            packet += b'\x30'
+        elif self.qos_lvl == 1:
+            packet += b'\x32'
+        elif self.qos_lvl == 2:
+            packet += b'\x34'
 
         variable_header += b'\x00'
         variable_header += bytes([len(self.packetVariableHeader['topic_name'])])

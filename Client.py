@@ -31,8 +31,8 @@ class Client:
         msg = self.s.recv(1024)
         print(msg)
 
-    def publish(self, topic_name):
-        packet = packets.PUBLISH(topic_name)
+    def publish(self, topic_name, qos_lvl):
+        packet = packets.PUBLISH(topic_name, qos_lvl)
         packet = packet.parse()
 
         self.s.sendall(packet)

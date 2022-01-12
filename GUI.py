@@ -64,7 +64,13 @@ class GUI:
         topic_combobox.grid(column=1, row=1)
         topic_combobox.current()
 
-        ttk.Button(publish_frame, text="Publish", command=lambda:self.client.publish(chosen_topic_publish.get())).grid(column=1, row=2)
+        QoS_Option = tk.StringVar()
+
+        ttk.Button(publish_frame, text="Publish", command=lambda:self.client.publish(chosen_topic_publish.get(), int(QoS_Option.get()))).grid(column=1, row=2)
+
+        ttk.Radiobutton(publish_frame, text="QoS 0", variable=QoS_Option, value=0).grid(column=1, row=3)
+        ttk.Radiobutton(publish_frame, text="QoS 1", variable=QoS_Option, value=1).grid(column=1, row=4)
+        ttk.Radiobutton(publish_frame, text="QoS 2", variable=QoS_Option, value=2).grid(column=1, row=5)
 
         # subscriber frame
         subscribe_frame.columnconfigure(0, weight=1)
@@ -78,6 +84,7 @@ class GUI:
         topic_combobox['values'] = ('CpuInfo', 'CpuUsage', 'MemoryInfo', 'DiskInfo')
         topic_combobox.grid(column=1, row=1)
         topic_combobox.current()
+
 
         text_subs = tk.Text(subscribe_frame, height=5, width=52)
         text_subs.grid(column=1, row=5)
