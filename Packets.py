@@ -21,15 +21,15 @@ class CONNECT(Packet):
 
         self.packetPayload = {
             'client_id': str(id),
-            'will_topic': bytearray(),
-            'will_message': bytearray(),
+            'will_topic': 'CpuInfo',
+            'will_message': '  Din cauza unei erori un alt client a fost deconectat',
             'username': username,
             'password': password
         }
         self.packetVariableHeader = {
             'protocol_name': "MQTT",
             'version': b'\x04',
-            'connect_flags': b'\xC2',
+            'connect_flags': b'\xf6',
             'keep_alive': b'\x00' + bytes(chr(keep_alive), encoding='ascii'),
         }
 
@@ -48,6 +48,12 @@ class CONNECT(Packet):
         payload = b'\x00'
         payload += bytes([len(self.packetPayload['client_id'])])
         payload += self.packetPayload['client_id'].encode('UTF-8')
+        payload += b'\x00'
+        payload += bytes([len(self.packetPayload['will_topic'])])
+        payload += self.packetPayload['will_topic'].encode('UTF-8')
+        payload += b'\x00'
+        payload += bytes([len(self.packetPayload['will_message'])])
+        payload += self.packetPayload['will_message'].encode('UTF-8')
         payload += b'\x00'
         payload += bytes([len(self.packetPayload['username'])])
         payload += self.packetPayload['username'].encode('UTF-8')
@@ -133,7 +139,7 @@ class SUBSCRIBE(Packet):
 
         self.packetPayload = {
             'Topic_name': topic_name,
-            'req_QoS': b'\x01'
+            'req_QoS': b'\x02'
         }
         self.packetVariableHeader = {
             'packetIdentifier': b'\x00\x0b'

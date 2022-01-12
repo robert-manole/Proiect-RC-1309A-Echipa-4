@@ -61,7 +61,6 @@ class Client:
 
         recv_thread = threading.Thread(target=self.receive_msg, args=(self.s, text_msg))
         if not recv_thread.is_alive():
-            recv_thread.setDaemon(True)
             recv_thread.start()
 
         # msg = self.s.recv(1024)
