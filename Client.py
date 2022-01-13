@@ -104,7 +104,7 @@ class Client:
             msg = s.recv(4096)
             if msg:
                 print(msg)
-                if msg[0] == 0x32: # publish pack
+                if msg[0] == 0x34 or msg[0] == 0x32 or msg[0] == 0x30: # publish pack
 
                     if msg[1] > 127:
                         offset = 5
